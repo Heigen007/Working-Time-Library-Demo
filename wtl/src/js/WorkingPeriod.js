@@ -4,10 +4,9 @@ var segmentsFLevel = null;
 var segmentsSLevel = null;
 var segmentsTLevel = null;
 var accumulator = 0;
-var isNextDay = true;
 var currentDate = null;
 
-export default function FindWorkingPeriod(validatyRange, InnerSegments) {
+export default function FindWorkingPeriod(validatyRange, InnerSegments, options) {
     // Filling variables
     startingDate = new Date(validatyRange[0])
     currentDate = new Date(validatyRange[0])
@@ -20,6 +19,17 @@ export default function FindWorkingPeriod(validatyRange, InnerSegments) {
     for (let index = 0; index <= (endingDate - startingDate) / (1000 * 3600 * 24); index++) {
         calcDayTime()
     }
+    if (options && options?.format) {
+        switch (options.format) {
+            case "Seconds":
+                return accumulator;
+            case "Minutes":
+                return Math.round((accumulator/60) * 100) / 100
+            case "Hours":
+                return Math.round((accumulator/(3600)) * 100) / 100
+        }
+    }
+    return accumulator
 }
 
 function calcDayTime() {
@@ -86,17 +96,26 @@ function calcDayTime() {
     });
 
     if(FunctionCurrentDate.rests.length > 1) {
-        var Sort = FunctionCurrentDate.rests.sort((a,b) => a[0] - b[0])
+        var Sort = JSON.parse(JSON.stringify(FunctionCurrentDate.rests.sort((a,b) => a[0] - b[0])))
+        for (let i = 0; i < Sort.length; i++) {
+            if(Sort[i][0] < FunctionCurrentDate.dayStartTimeOffset) Sort[i][0] = FunctionCurrentDate.dayStartTimeOffset
+            if(Sort[i][1] < FunctionCurrentDate.dayStartTimeOffset) Sort[i][1] = FunctionCurrentDate.dayStartTimeOffset
+            if(Sort[i][0] > FunctionCurrentDate.dayEndTimeOffset) Sort[i][0] = FunctionCurrentDate.dayEndTimeOffset
+            if(Sort[i][1] > FunctionCurrentDate.dayEndTimeOffset) Sort[i][1] = FunctionCurrentDate.dayEndTimeOffset
+        }
         for (let restIndex = 0; restIndex < Sort.length - 1; restIndex++) {
             if(Sort[restIndex + 1][0] < Sort[restIndex][1]) {
                 Sort[restIndex + 1] = [Sort[restIndex][0],Sort[restIndex+1][1]]
-                Sort.shift()
+                Sort.splice(restIndex,1)
+                restIndex -= 1
             }
-    
         }
+
+        FunctionCurrentDate.rests = Sort
     }
 
-    console.log(currentDate, FunctionCurrentDate);
+    accumulator += accumulateDayTime(FunctionCurrentDate)
+
     currentDate.setDate(currentDate.getDate() + 1)
 }
 
@@ -110,11 +129,25 @@ function CheckFLevelDay(element, FunctionDayOfWeek) {
 }
 
 function CheckSLevelDay(element) {
-    if( element.status && isValidatyDayFrom(element))
-    return true
+    if( element.status && isValidatyDayFrom(element)) return true
     return false
 }
 
 function isValidatyDayFrom(element){
-    return element.segmentValidatyDays.findIndex(el => {return new Date(el).toISOString() == currentDate.toISOString()}) != -1
+    return element.segmentValidatyDays.findIndex(el => new Date(el).toISOString() == currentDate.toISOString()) != -1
+}
+
+function accumulateDayTime(FunctionCurrentDate) {
+    var localRestAcc = 0
+    var localStartingTime = FunctionCurrentDate
+    if( !localStartingTime.hasOwnProperty('dayStartTimeOffset')
+        && !localStartingTime.hasOwnProperty('dayEndTimeOffset')
+        && localStartingTime.hasOwnProperty('rests')
+        && localStartingTime.rests[0] == 0)
+    return 0
+
+    for (let rest = 0; rest < localStartingTime.rests.length; rest++) {
+        localRestAcc += localStartingTime.rests[rest][1] - localStartingTime.rests[rest][0]
+    }
+    return localStartingTime.dayEndTimeOffset - localStartingTime.dayStartTimeOffset - localRestAcc
 }

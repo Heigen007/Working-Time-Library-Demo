@@ -79,26 +79,12 @@ export default {
           description: '2 lvl segment for rest time',
           status: true,
           timeCategory: 0,
-          segmentStartTimeOffset: 43700, //10 - 11 r
-          segmentEndTimeOffset: 44600,
+          segmentStartTimeOffset: 18000, //5 - 10:30 r
+          segmentEndTimeOffset: 37800,
           segmentType: 1,
           segmentLevel: 2,
           segmentValidatyDays: [
             "2021-8-12",
-            "2021-8-16"
-          ]
-        },
-        {
-          name: 'Segment2LvlRestTime',
-          description: '2 lvl segment for rest time',
-          status: true,
-          timeCategory: 0,
-          segmentStartTimeOffset: 37800, //10:30 - 11:30 r
-          segmentEndTimeOffset: 42400,
-          segmentType: 1,
-          segmentLevel: 2,
-          segmentValidatyDays: [
-            "2021-8-27",
             "2021-8-16"
           ]
         },
@@ -116,13 +102,17 @@ export default {
         },
       ],
       validatyRange: [
-        "2021-8-1",
-        "2021-8-20"
-      ]
+        "2021-8-10",
+        "2021-8-16"
+      ],
+      options: {
+        format: 'Seconds', //Seconds | Minutes | Hours
+      }
     }
   },
   mounted() {
-    FindWorkingPeriod(this.validatyRange,this.segments)
+    var answer = FindWorkingPeriod(this.validatyRange,this.segments,this.options)
+    console.log(answer);
   }
 }
 </script>
