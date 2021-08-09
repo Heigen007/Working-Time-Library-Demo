@@ -51,8 +51,6 @@ export default {
           description: '2 lvl segment for working time',
           status: true,
           timeCategory: 1,
-          validityStartDate: "2010-1-1",
-          validityEndDate: "2050-1-1",
           segmentStartTimeOffset: 32400, //9 - 18 w
           segmentEndTimeOffset: 64800,
           segmentType: 1,
@@ -67,8 +65,6 @@ export default {
           description: '2 lvl segment for rest time',
           status: true,
           timeCategory: 0,
-          validityStartDate: "2010-1-1",
-          validityEndDate: "2050-1-1",
           segmentStartTimeOffset: 36000, //10 - 11 r
           segmentEndTimeOffset: 39600,
           segmentType: 1,
@@ -79,14 +75,38 @@ export default {
           ]
         },
         {
+          name: 'Segment2LvlRestTime',
+          description: '2 lvl segment for rest time',
+          status: true,
+          timeCategory: 0,
+          segmentStartTimeOffset: 43700, //10 - 11 r
+          segmentEndTimeOffset: 44600,
+          segmentType: 1,
+          segmentLevel: 2,
+          segmentValidatyDays: [
+            "2021-8-12",
+            "2021-8-16"
+          ]
+        },
+        {
+          name: 'Segment2LvlRestTime',
+          description: '2 lvl segment for rest time',
+          status: true,
+          timeCategory: 0,
+          segmentStartTimeOffset: 37800, //10:30 - 11:30 r
+          segmentEndTimeOffset: 42400,
+          segmentType: 1,
+          segmentLevel: 2,
+          segmentValidatyDays: [
+            "2021-8-27",
+            "2021-8-16"
+          ]
+        },
+        {
           name: 'Segment3Lvl',
           description: '3 lvl segment for holidays',
           status: true,
           timeCategory: 0,
-          validityStartDate: "2010-1-1",
-          validityEndDate: "2050-1-1",
-          segmentStartTimeOffset: 0, //10 - 11 r
-          segmentEndTimeOffset: 86400,
           segmentType: 1,
           segmentLevel: 3,
           segmentValidatyDays: [
