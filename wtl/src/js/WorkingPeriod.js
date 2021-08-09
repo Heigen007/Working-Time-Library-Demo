@@ -40,13 +40,13 @@ function calcDayTime() {
     //First level segment iteration
 
     segmentsFLevelCopyTimeCategory1.forEach(element => {
-        if(CheckDay(element, FunctionDayOfWeek)) {
+        if(CheckFLevelDay(element, FunctionDayOfWeek)) {
             FunctionCurrentDate.dayStartTimeOffset = element.segmentStartTimeOffset
             FunctionCurrentDate.dayEndTimeOffset = element.segmentEndTimeOffset
         }
     });
     segmentsFLevelCopyTimeCategory2.forEach(element => {
-        if(CheckDay(element, FunctionDayOfWeek)) {
+        if(CheckFLevelDay(element, FunctionDayOfWeek)) {
             FunctionCurrentDate.rests.push([element.segmentStartTimeOffset, element.segmentEndTimeOffset])
         }
     });
@@ -55,7 +55,7 @@ function calcDayTime() {
 
     segmentsSLevelCopyTimeCategory1.forEach(element => {
         console.log(element);
-        if(CheckDay(element, FunctionDayOfWeek)) {
+        if(CheckSLevelDay(element, FunctionDayOfWeek)) {
             alert(1)
             FunctionCurrentDate.dayStartTimeOffset = element.segmentStartTimeOffset
             FunctionCurrentDate.dayEndTimeOffset = element.segmentEndTimeOffset
@@ -65,7 +65,7 @@ function calcDayTime() {
     if(IsExtraDay) {
         FunctionCurrentDate.rests = []
         segmentsSLevelCopyTimeCategory2.forEach(element => {
-            if(CheckDay(element, FunctionDayOfWeek)) {
+            if(CheckSLevelDay(element, FunctionDayOfWeek)) {
                 FunctionCurrentDate.rests.push([element.segmentStartTimeOffset, element.segmentEndTimeOffset])
             }
         });
@@ -75,7 +75,7 @@ function calcDayTime() {
     currentDate.setDate(currentDate.getDate() + 1)
 }
 
-function CheckDay(element, FunctionDayOfWeek) {
+function CheckFLevelDay(element, FunctionDayOfWeek) {
     if( element['flag'+FunctionDayOfWeek]
         && element.status
         && new Date(element.validityStartDate) < currentDate
