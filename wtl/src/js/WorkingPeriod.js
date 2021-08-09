@@ -8,17 +8,20 @@ var currentDate = null;
 
 export default function FindWorkingPeriod(validatyRange, InnerSegments, options) {
     // Filling variables
+    console.time('Time')
     startingDate = new Date(validatyRange[0])
     currentDate = new Date(validatyRange[0])
     endingDate = new Date(validatyRange[1])
     segmentsFLevel = InnerSegments.filter(el => el.segmentLevel == 1 && el.status).sort((a,b) => b.timeCategory - a.timeCategory)
     segmentsSLevel = InnerSegments.filter(el => el.segmentLevel == 2 && el.status).sort((a,b) => b.timeCategory - a.timeCategory)
     segmentsTLevel = InnerSegments.filter(el => el.segmentLevel == 3 && el.status).sort((a,b) => b.timeCategory - a.timeCategory)
+
     //Counting time of each day and accumulating the result
 
     for (let index = 0; index <= (endingDate - startingDate) / (1000 * 3600 * 24); index++) {
         calcDayTime()
     }
+    console.timeEnd('Time');
     if (options && options?.format) {
         switch (options.format) {
             case "Seconds":
@@ -27,6 +30,8 @@ export default function FindWorkingPeriod(validatyRange, InnerSegments, options)
                 return Math.round((accumulator/60) * 100) / 100
             case "Hours":
                 return Math.round((accumulator/(3600)) * 100) / 100
+            default:
+                return accumulator;
         }
     }
     return accumulator
