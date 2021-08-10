@@ -8,30 +8,25 @@ var currentDate = null;
 
 export default function FindWorkingPeriod(validatyRange, InnerSegments, options) {
     // Filling variables
-    console.time('Time')
     startingDate = new Date(validatyRange[0])
     currentDate = new Date(validatyRange[0])
     endingDate = new Date(validatyRange[1])
-    segmentsFLevel = InnerSegments.filter(el => el.segmentLevel == 1 && el.status).sort((a,b) => b.timeCategory - a.timeCategory)
-    segmentsSLevel = InnerSegments.filter(el => el.segmentLevel == 2 && el.status).sort((a,b) => b.timeCategory - a.timeCategory)
-    segmentsTLevel = InnerSegments.filter(el => el.segmentLevel == 3 && el.status).sort((a,b) => b.timeCategory - a.timeCategory)
+    segmentsFLevel = InnerSegments.filter(el => el.segmentLevel == 1 && el.status)
+    segmentsSLevel = InnerSegments.filter(el => el.segmentLevel == 2 && el.status)
+    segmentsTLevel = InnerSegments.filter(el => el.segmentLevel == 3 && el.status)
 
     //Counting time of each day and accumulating the result
 
     for (let index = 0; index <= (endingDate - startingDate) / (1000 * 3600 * 24); index++) {
         calcDayTime()
     }
-    console.timeEnd('Time');
+
     if (options && options?.format) {
         switch (options.format) {
-            case "Seconds":
-                return accumulator;
-            case "Minutes":
-                return Math.round((accumulator/60) * 100) / 100
-            case "Hours":
-                return Math.round((accumulator/(3600)) * 100) / 100
-            default:
-                return accumulator;
+            case "Seconds": return accumulator;
+            case "Minutes": return Math.round((accumulator/60) * 100) / 100
+            case "Hours": return Math.round((accumulator/(3600)) * 100) / 100
+            default: return accumulator;
         }
     }
     return accumulator
@@ -39,85 +34,34 @@ export default function FindWorkingPeriod(validatyRange, InnerSegments, options)
 
 function calcDayTime() {
     // Filling variables
-    var IsExtraDay = false
-    var FunctionCurrentDate = {rests: []}
-
-    var segmentsFLevelCopyTimeCategory1 = JSON.parse(JSON.stringify(segmentsFLevel.filter(el => el.timeCategory == 1)))
-    var segmentsFLevelCopyTimeCategory2 = JSON.parse(JSON.stringify(segmentsFLevel.filter(el => el.timeCategory == 0)))
-
-    var segmentsSLevelCopyTimeCategory1 = JSON.parse(JSON.stringify(segmentsSLevel.filter(el => el.timeCategory == 1)))
-    var segmentsSLevelCopyTimeCategory2 = JSON.parse(JSON.stringify(segmentsSLevel.filter(el => el.timeCategory == 0)))
-
-    var segmentsTLevelCopy = JSON.parse(JSON.stringify(segmentsTLevel.filter(el => el.timeCategory == 0)))
-
+    var FunctionCurrentDate = {}
+    var segmentsFLevelCopy = JSON.parse(JSON.stringify(segmentsFLevel))
+    var segmentsSLevelCopy = JSON.parse(JSON.stringify(segmentsSLevel))
+    var segmentsTLevelCopy = JSON.parse(JSON.stringify(segmentsTLevel))
     var FunctionDayOfWeek = new Intl.DateTimeFormat('en-US', { weekday: 'long'}).format(currentDate)
-
     //First level segment iteration
 
-    segmentsFLevelCopyTimeCategory1.forEach(element => {
+    segmentsFLevelCopy.forEach(element => {
         if(CheckFLevelDay(element, FunctionDayOfWeek)) {
-            FunctionCurrentDate.dayStartTimeOffset = element.segmentStartTimeOffset
-            FunctionCurrentDate.dayEndTimeOffset = element.segmentEndTimeOffset
-            IsExtraDay = true
+            FunctionCurrentDate.segmentWorkingPeriods = element.segmentWorkingPeriods[FunctionDayOfWeek]
+        } else {
+            FunctionCurrentDate.segmentWorkingPeriods = null
         }
     });
-    if(IsExtraDay) {
-        segmentsFLevelCopyTimeCategory2.forEach(element => {
-            if(CheckFLevelDay(element, FunctionDayOfWeek)) {
-                FunctionCurrentDate.rests.push([element.segmentStartTimeOffset, element.segmentEndTimeOffset])
-            }
-        });
-    } else {
-        FunctionCurrentDate.rests = [0, 86400]
-    }
 
-    IsExtraDay = false
     //Second level segment iteration
 
-    segmentsSLevelCopyTimeCategory1.forEach(element => {
-        if(CheckSLevelDay(element)) {
-            FunctionCurrentDate.dayStartTimeOffset = element.segmentStartTimeOffset
-            FunctionCurrentDate.dayEndTimeOffset = element.segmentEndTimeOffset
-            IsExtraDay = true
-        }
+    segmentsSLevelCopy.forEach(element => {
+        if(CheckSLevelDay(element)) FunctionCurrentDate.segmentWorkingPeriods = element.segmentWorkingPeriod
     });
-    if(IsExtraDay) {
-        FunctionCurrentDate.rests = []
-        segmentsSLevelCopyTimeCategory2.forEach(element => {
-            if(CheckSLevelDay(element)) {
-                FunctionCurrentDate.rests.push([element.segmentStartTimeOffset, element.segmentEndTimeOffset])
-            }
-        });
-        if(FunctionCurrentDate.rests.length == 0) FunctionCurrentDate.rests = [0, 86400]
-    }
 
     //Third level segment iteration
 
     segmentsTLevelCopy.forEach(element => {
         if(CheckSLevelDay(element)) {
-            FunctionCurrentDate = {}
-            FunctionCurrentDate.rests = [0, 86400]
+            FunctionCurrentDate.segmentWorkingPeriods = null
         }
     });
-
-    if(FunctionCurrentDate.rests.length > 1) {
-        var Sort = JSON.parse(JSON.stringify(FunctionCurrentDate.rests.sort((a,b) => a[0] - b[0])))
-        for (let i = 0; i < Sort.length; i++) {
-            if(Sort[i][0] < FunctionCurrentDate.dayStartTimeOffset) Sort[i][0] = FunctionCurrentDate.dayStartTimeOffset
-            if(Sort[i][1] < FunctionCurrentDate.dayStartTimeOffset) Sort[i][1] = FunctionCurrentDate.dayStartTimeOffset
-            if(Sort[i][0] > FunctionCurrentDate.dayEndTimeOffset) Sort[i][0] = FunctionCurrentDate.dayEndTimeOffset
-            if(Sort[i][1] > FunctionCurrentDate.dayEndTimeOffset) Sort[i][1] = FunctionCurrentDate.dayEndTimeOffset
-        }
-        for (let restIndex = 0; restIndex < Sort.length - 1; restIndex++) {
-            if(Sort[restIndex + 1][0] < Sort[restIndex][1]) {
-                Sort[restIndex + 1] = [Sort[restIndex][0],Sort[restIndex+1][1]]
-                Sort.splice(restIndex,1)
-                restIndex -= 1
-            }
-        }
-
-        FunctionCurrentDate.rests = Sort
-    }
 
     accumulator += accumulateDayTime(FunctionCurrentDate)
 
@@ -125,7 +69,7 @@ function calcDayTime() {
 }
 
 function CheckFLevelDay(element, FunctionDayOfWeek) {
-    if( element['flag'+FunctionDayOfWeek]
+    if( element.segmentWorkingPeriods[FunctionDayOfWeek] != null
         && element.status
         && new Date(element.validityStartDate) < currentDate
         && new Date(element.validityEndDate) > currentDate)
@@ -144,15 +88,11 @@ function isValidatyDayFrom(element){
 
 function accumulateDayTime(FunctionCurrentDate) {
     var localRestAcc = 0
-    var localStartingTime = FunctionCurrentDate
-    if( !localStartingTime.hasOwnProperty('dayStartTimeOffset')
-        && !localStartingTime.hasOwnProperty('dayEndTimeOffset')
-        && localStartingTime.hasOwnProperty('rests')
-        && localStartingTime.rests[0] == 0)
-    return 0
-
-    for (let rest = 0; rest < localStartingTime.rests.length; rest++) {
-        localRestAcc += localStartingTime.rests[rest][1] - localStartingTime.rests[rest][0]
+    if(FunctionCurrentDate.segmentWorkingPeriods == null) return 0
+    for (let index = 0; index < FunctionCurrentDate.segmentWorkingPeriods.length; index++) {
+        localRestAcc += (FunctionCurrentDate.segmentWorkingPeriods[index][1].split(':')[0] - FunctionCurrentDate.segmentWorkingPeriods[index][0].split(':')[0]) * 3600
+        if(FunctionCurrentDate.segmentWorkingPeriods[index][1].split(':').length > 1) localRestAcc += FunctionCurrentDate.segmentWorkingPeriods[index][1].split(':')[1] - FunctionCurrentDate.segmentWorkingPeriods[index][0].split(':')[1] * 60
+        if(FunctionCurrentDate.segmentWorkingPeriods[index][1].split(':').length > 2) localRestAcc += FunctionCurrentDate.segmentWorkingPeriods[index][1].split(':')[2] - FunctionCurrentDate.segmentWorkingPeriods[index][0].split(':')[2]
     }
-    return localStartingTime.dayEndTimeOffset - localStartingTime.dayStartTimeOffset - localRestAcc
+    return localRestAcc
 }
