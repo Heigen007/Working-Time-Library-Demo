@@ -36,8 +36,8 @@
         <div v-else>Choose the day: </div>
         <DatePicker v-model="ExtraDays[y].date"></DatePicker>
         <div>Choose the time range:</div>
-        <div class = 'Button' @click='ExtraDays[y].ranges.push([])' style='font-size: 1.3rem; display: flex; flex-direction: column; align-items: center'>Add time range</div>
-
+        <div class = 'Button' @click='ExtraDays[y].ranges.push([])' style='font-size: 1.3rem; display: flex; flex-direction: column; align-items: center'>Add working range</div>
+        <div v-if='ExtraDays[y].ranges.length > 0' class = 'Button Delete' @click='ExtraDays[y].ranges.pop()' style='font-size: 1.3rem; display: flex; flex-direction: column; align-items: center'>Delete working range</div>
             <div v-for='(range, o) in ExtraDays[y].ranges' :key='o'>
               <DatePicker v-model="ExtraDays[y].ranges[o]" type='time' format= "HH:mm" range></DatePicker>
             </div>
@@ -53,6 +53,7 @@
 import FindWorkingPeriod from 'work-time-library'
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
+import Swal from 'sweetalert2'
 export default {
   data() {
     return {
@@ -100,11 +101,11 @@ export default {
 
       ],
       validatyRange: [
-        "2021-8-10",
-        "2021-8-16"
+        "2021-8-10", // 10 August, 2021
+        "2021-8-16" // 16 August, 2021
       ],
       functionOptions: {
-        format: 'Hours', //Seconds | Minutes | Hours
+        format: 'Seconds', //Seconds | Minutes | Hours
       },
       time: null,
       WeekDays: [
@@ -223,7 +224,12 @@ export default {
       })
 
       var answer = FindWorkingPeriod(this.validatyRange,this.segmentsCopy,this.functionOptions)
-      console.log(answer);
+
+      Swal.fire(
+        'Success!',
+        `Amount of working seconds: ${answer}`,
+        'success'
+      )
     }
   }
 }
