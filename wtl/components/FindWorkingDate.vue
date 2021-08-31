@@ -1,11 +1,11 @@
 <template>
   <div class="root">
         <div class="MainBox">
-      <div class="row">
+      <div class="rowM">
         <span>Choose the starting date：</span>
         <DatePicker v-model="time" type='datetime' format= "YYYY-MM-DDTHH:mm:ss"></DatePicker>
       </div>
-      <div class="row">
+      <div class="rowM">
         <span>Write down the additional secs：</span>
         <input type="number" v-model="AdditionalSecs">
       </div>
@@ -284,7 +284,7 @@ export default {
   background-color: rgb(38, 240, 173);
   margin-bottom: 30px;
 }
-.row{
+.rowM{
   width: 100%;
   display: flex;
   justify-content: center;

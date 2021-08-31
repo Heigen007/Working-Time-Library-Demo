@@ -2,7 +2,7 @@
 <template>
   <div class="root">
         <div class="MainBox">
-      <div class="row">
+      <div class="rowM">
         <span>Choose the period of time：</span>
         <DatePicker v-model="time" type='date' format= "YYYY-MM-DD" range></DatePicker>
       </div>
@@ -277,7 +277,7 @@ export default {
   background-color: rgb(38, 240, 173);
   margin-bottom: 30px;
 }
-.row{
+.rowM{
   width: 100%;
   display: flex;
   justify-content: center;
